@@ -10,26 +10,26 @@ openai.api_key = os.environ.get("OPENAI_API_KEY")
 app = Flask(__name__)
 
 def generate_description_openai(product_name, keywords, tone="neutral"):
-    # Clean up the keywords list (remove extra whitespace)
     keywords_list = [kw.strip() for kw in keywords]
-    
-    # Construct the prompt using the product name, keywords, and tone.
     prompt = (
         f"Write a compelling product description for '{product_name}', "
         f"incorporating these keywords: {', '.join(keywords_list)}. "
-        f"Use a {tone} tone.\n\nProduct Description:"
+        f"Use a {tone} tone."
     )
     try:
-        response = openai.Completion.create(
-            engine="text-davinci-003",
-            prompt=prompt,
-            max_tokens=150,
-            n=1,
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",  # You can change to a different model if needed
+            messages=[
+                {"role": "system", "content": "You are a creative product description generator."},
+                {"role": "user", "content": prompt}
+            ],
             temperature=0.7,
+            max_tokens=150,
         )
-        return response.choices[0].text.strip()
+        return response.choices[0].message.content.strip()
     except Exception as e:
         return f"An error occurred: {str(e)}"
+
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
